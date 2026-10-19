@@ -1,0 +1,27 @@
+# Claude Code 本地配置
+CLAUDE.local.md
+.claude/settings.local.json
+
+# Java / Maven
+target/
+*.class
+*.log
+
+# Node
+node_modules/
+dist/
+unpackage/
+
+# IDE
+.idea/
+*.iml
+.vscode/
+
+# 环境变量与密钥
+.env
+.env.*
+!.env.example
+
+# 系统文件
+.DS_Store
+Thumbs.db
