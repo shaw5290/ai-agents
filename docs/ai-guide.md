@@ -1,54 +1,99 @@
-# AI 编码助手配置说明
+# AI 编码助手文档说明
 
-本项目为 Claude Code、Codex、Cursor 等 AI 编码助手准备了一组指令文档。本文说明各文件的作用、加载关系和维护方式，供团队成员阅读；AI 不需要读本文。
+本项目的 `AGENTS.md`、`CLAUDE.md` 由 `docs/agent-templates/` 中的模块拼装生成。通用约束和各架构规范拆成独立模块，不同项目按需挑选组合。本文供团队成员阅读，AI 不需要读。
 
 ## 文件一览
 
-| 文件 | 读者 | 内容 | 是否入库 |
-|---|---|---|---|
-| `AGENTS.md` | 所有 AI 工具 | 项目概述、技术栈、目录结构、命令、编码规范 | 是 |
-| `CLAUDE.md` | Claude Code | 与 `AGENTS.md` 相同的项目规范，外加 Claude Code 工作方式 | 是 |
-| `CLAUDE.local.md` | Claude Code（个人） | 本机环境、本地服务地址、个人偏好 | 否 |
-| `.claude/rules/coding-behavior.md` | Claude Code | 编码行为准则 | 是 |
-| `.claude/rules/claude-extensions.md` | Claude Code | `.claude/` 扩展结构、常用指令、Skills 映射 | 是 |
-
-## 加载关系
-
-```
-Claude Code
-├── CLAUDE.md
-├── CLAUDE.local.md            （自动加载）
-└── .claude/rules/*.md         （自动加载）
-
-Codex / Cursor 等
-└── AGENTS.md
-```
-
-- `.claude/rules/` 下的文件由 Claude Code 自动加载，不需要在 `CLAUDE.md` 中再引用，否则会重复。
-
-## 内容来源
-
-| 文件 | 来源 | 取用方式 |
+| 文件 | 读者 | 是否入库 |
 |---|---|---|
-| `coding-behavior.md` | [andrej-karpathy-skills](https://github.com/forrestchang/andrej-karpathy-skills) | 原文四条准则译为中文，删去解释性语句 |
-| `claude-extensions.md` | [Everything Claude Code](https://github.com/affaan-m/everything-claude-code) | 只借用组织方式（扩展结构、指令表、Skills 映射），内容按本项目改写；原项目的插件专属命令（`/tdd`、`/e2e` 等）未引入 |
+| `AGENTS.md` | 所有 AI 工具（Codex、Cursor 等） | 是，生成文件 |
+| `CLAUDE.md` | Claude Code | 是，生成文件 |
+| `CLAUDE.local.md` | Claude Code（个人本机配置） | 否 |
+| `docs/agent-templates/` | 模板库，维护规范的地方 | 是 |
 
-## 编写原则
+`CLAUDE.md` = `AGENTS.md` 的全部内容 + Claude Code 专属模块。两份文件都独立完整，互不引用。
 
-- 指令文档只写给 AI 的规则、事实和命令，不写来源、背景、解释，这些写进本文。
-- 每条规则都应能被检验，避免"尽量写好代码"这类空话。
-- `AGENTS.md` 与 `CLAUDE.md` 各自独立、互不引用，项目规范在两份文件中保持一致。
-- 版本历史由 git 记录，文档内不写变更记录。
+## 模板库结构
+
+```
+docs/agent-templates/
+├── build.sh                     # 拼装脚本
+├── common/                      # 通用约束，所有项目都用
+│   ├── behavior.md              # 编码行为准则
+│   ├── workflow.md              # 工作要求
+│   ├── security.md              # 安全规范
+│   ├── git.md                   # Git 规范
+│   └── doc-maintenance.md       # 文档维护（告诉 AI 改模板而不是改生成文件）
+├── backend/
+│   ├── spring-boot.md           # 单体与微服务共用：分层、接口、事务、日志
+│   ├── spring-cloud.md          # 微服务追加：网关、Feign、服务边界
+│   └── mysql.md
+├── orm/                         # 三选一（mybatis-plus-join 需配合 mybatis-plus）
+│   ├── mybatis-plus.md
+│   ├── mybatis-plus-join.md
+│   └── mybatis-flex.md
+├── frontend/
+│   ├── vue3.md
+│   └── uniapp.md
+├── claude/
+│   └── claude-code.md           # Claude Code 工作方式、扩展结构、常用指令
+└── projects/
+    └── linligo/
+        ├── modules.txt          # 模块清单（决定拼装内容与顺序）
+        ├── project.md           # 项目概述、技术栈、目录、命令
+        └── claude-skills.md     # 项目的 Skills 映射
+```
+
+## 拼装规则
+
+- `modules.txt` 每行一个模块路径（不带 `.md`），按顺序拼接；`#` 开头为注释。
+- `claude/` 下的模块和文件名以 `claude-` 开头的模块只写入 `CLAUDE.md`，其余同时写入两份文件。
+- 模块文件以 `##` 作为顶级标题，生成文件的 `#` 标题由脚本添加。
+- 项目模块里的 Claude 专属文件不要命名为 `claude.md`：Windows 盘大小写不敏感，Claude Code 会把它当成 `CLAUDE.md` 自动加载。
+
+## 常见组合
+
+| 项目类型 | 模块 |
+|---|---|
+| Spring Boot 单体 + MyBatis-Plus | common/* + backend/spring-boot + backend/mysql + orm/mybatis-plus |
+| 再加联表查询 | 上面 + orm/mybatis-plus-join |
+| Spring Boot 单体 + MyBatis-Flex | common/* + backend/spring-boot + backend/mysql + orm/mybatis-flex |
+| Spring Cloud 微服务 | 上述任一 + backend/spring-cloud |
+| 管理后台前端 | + frontend/vue3 |
+| 小程序 | + frontend/uniapp |
+
+`common/*` 指 behavior、workflow、security、git、doc-maintenance 五个模块。
+
+## 新项目接入
+
+1. 新建 `projects/<项目名>/`，参照 `projects/linligo/` 编写 `project.md`、`modules.txt`，按需写 `claude-skills.md`。
+2. 生成到当前仓库根目录：`docs/agent-templates/build.sh <项目名>`。
+   生成到其他项目：`docs/agent-templates/build.sh <项目名> /path/to/project`。
+3. 生成到其他项目时，目标项目里没有模板库，需要改写 `common/doc-maintenance.md` 中的路径，或者在该项目的清单中不使用这个模块。
 
 ## 维护
 
 | 发生了什么 | 改哪里 |
 |---|---|
-| 技术选型确定 | `AGENTS.md` 与 `CLAUDE.md` 技术栈表，去掉「待定」 |
-| 新增或调整模块 | `AGENTS.md` 与 `CLAUDE.md` 目录结构 |
-| 脚手架、脚本变化 | `AGENTS.md` 与 `CLAUDE.md` 常用命令，确保每条都能直接运行 |
-| 新建 skill / 命令 / 子代理 | `claude-extensions.md` 的指令表和 Skills 映射 |
-| AI 反复犯同一类错误 | 对应规范小节，或在 `.claude/rules/` 新增规则文件 |
+| 某类规范需要调整（对所有项目生效） | 对应的 `common/`、`backend/`、`orm/`、`frontend/` 模块 |
+| 只对某个项目生效的约定 | `projects/<项目名>/project.md` |
+| 技术选型确定、目录或命令变化 | `projects/<项目名>/project.md` |
+| 引入或更换框架 | `projects/<项目名>/modules.txt` 增删模块；没有现成模块就新建 |
+| 新建 skill / 命令 / 子代理 | `projects/<项目名>/claude-skills.md` |
 | 只和自己电脑有关的配置 | `CLAUDE.local.md` |
 
-`CLAUDE.local.md` 和 `.claude/settings.local.json` 已加入 `.gitignore`。新成员可参照 `CLAUDE.local.md` 的结构自行创建。
+改完运行 `build.sh` 重新生成，并把模板和生成文件一起提交。
+
+## 编写原则
+
+- 模块里只写给 AI 的规则、事实和命令，不写来源、背景、解释，这些写进本文。
+- 每条规则都应能检验，避免"写出高质量代码"这类空话。
+- 一条规则只放在一个模块里，不跨模块重复。
+- 模块之间互不引用，每个模块单独拿出来都能读懂。
+
+## 内容来源
+
+| 模块 | 来源 |
+|---|---|
+| `common/behavior.md` | [andrej-karpathy-skills](https://github.com/forrestchang/andrej-karpathy-skills)：四条准则译为中文，删去解释性语句 |
+| `claude/claude-code.md` | [Everything Claude Code](https://github.com/affaan-m/everything-claude-code)：借用扩展结构、指令表、Skills 映射的组织方式，内容按本项目改写 |

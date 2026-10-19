@@ -1,0 +1,6 @@
+## Git 规范
+
+- 分支：`main`、`dev`、`feature/xxx`、`fix/xxx`。
+- 提交信息遵循 Conventional Commits：`<type>(<scope>): <描述>`，type 取 `feat`、`fix`、`refactor`、`docs`、`test`、`chore`。
+- 一次提交只做一件事；不提交构建产物、IDE 配置、`.env`。
+- 未经用户要求不执行 commit、push、强制推送、改写历史。

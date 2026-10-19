@@ -1,0 +1,15 @@
+# 按顺序拼装；claude/ 下的模块和 claude-* 开头的模块只写入 CLAUDE.md
+projects/linligo/project
+common/behavior
+common/workflow
+common/security
+common/git
+backend/spring-boot
+backend/spring-cloud
+backend/mysql
+orm/mybatis-plus
+frontend/vue3
+frontend/uniapp
+common/doc-maintenance
+claude/claude-code
+projects/linligo/claude-skills
