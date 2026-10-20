@@ -31,7 +31,9 @@ ai-agents/
 │   ├── linligo/.agents/agent-docs/
 │   └── epost-integration-service/.agents/agent-docs/
 ├── .agents/agent-docs/          # 本仓库自身的配置，生成根目录 AGENTS.md / CLAUDE.md
-├── scripts/install.sh           # 把 skills 展平软链到 ~/.agents/skills
+├── scripts/
+│   ├── install.sh               # 通用安装（Linux / macOS / WSL）：展平软链或复制到任意目录
+│   └── install.ps1              # 通用安装（Windows）：展平为目录联接或复制
 └── docs/
     ├── ai-guide.md              # 本文
     ├── prompts/                 # 提示词
@@ -42,14 +44,21 @@ Agent Skills 标准只识别 `skills/<名>/SKILL.md` 这一层，分类只存在
 
 ## 安装
 
+通用安装不依赖任何工具：克隆本仓库，把 skill 展平装到工具扫描的 skills 目录。各工具的 plugin 机制只是额外的安装入口。
+
 | 方式 | 命令 | 适用 |
 |---|---|---|
+| 用户级（推荐） | `scripts/install.sh`，Windows 用 `powershell -ExecutionPolicy Bypass -File scripts\install.ps1` | 本机所有项目、所有读取 `~/.agents/skills` 的工具 |
+| 指定工具目录 | `scripts/install.sh <目录> [<目录>...]`，如 `scripts/install.sh ~/.agents/skills ~/.claude/skills` | 只读取自己专属目录的工具，路径以该工具文档为准 |
+| 项目级 | `scripts/install.sh --copy <项目>/.agents/skills`，Windows 用 `install.ps1 -Copy` | 随业务项目提交，团队成员无需各自安装 |
 | Claude Code plugin | `/plugin marketplace add shaw5290/ai-agents`，再 `/plugin install ai-agents@ai-agents` | Claude Code 用户 |
-| 软链到通用目录 | 克隆本仓库后运行 `scripts/install.sh`（默认装到 `~/.agents/skills`，也可传目标目录） | Codex 等读取 `~/.agents/skills` 的工具 |
 
-- plugin 中的 skill 带命名空间，例如 `/ai-agents:agent-docs`。
-- 更新：plugin 用 `/plugin marketplace update ai-agents` 后再 `/plugin update ai-agents`，然后重启；软链方式 `git pull` 即可。
-- WSL 中的软链对 Windows 侧的工具不可见，Windows 侧的工具需要在 Windows 中另行安装。
+- `.agents/skills/`（项目级）和 `~/.agents/skills/`（用户级）是 Agent Skills 的跨工具约定目录。
+- 默认方式建立软链（Windows 为目录联接，无需管理员权限），更新时在本仓库 `git pull` 即可。
+- `--copy` / `-Copy` 复制文件，会覆盖目标中的同名 skill；本仓库更新后要重新复制并提交。
+- 同一目标重复运行是安全的；目标中已有同名但来源不同的 skill 时跳过并提示。
+- WSL 中的软链对 Windows 侧的工具不可见，Windows 侧的工具用 `install.ps1` 安装。
+- plugin 中的 skill 带命名空间，例如 `/ai-agents:agent-docs`；更新用 `/plugin marketplace update ai-agents` 后再 `/plugin update ai-agents`，然后重启。
 
 要让团队成员打开业务项目时收到安装提示，在该项目的 `.claude/settings.json` 中加入：
 

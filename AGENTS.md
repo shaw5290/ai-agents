@@ -16,7 +16,7 @@ ai-agents/
 │   └── tools/                   # agent-docs 生成器及工具类 skill
 ├── examples/                    # 业务项目接入示例：linligo、epost-integration-service（.agents/agent-docs/）
 ├── .agents/agent-docs/          # 本仓库自身的 project.md、modules.txt
-├── scripts/install.sh           # 软链 skills 到 ~/.agents/skills
+├── scripts/                     # install.sh / install.ps1：通用安装，展平到任意 skills 目录
 └── docs/                        # 使用说明、提示词、参考资料（references/）
 ```
 
@@ -32,8 +32,9 @@ skills/tools/agent-docs/scripts/build.sh examples/linligo /tmp/linligo-out
 # 校验 plugin 与 marketplace
 claude plugin validate .
 
-# 安装 skills 到 ~/.agents/skills（可传目标目录）
+# 安装 skills：默认 ~/.agents/skills，可传多个目标目录；--copy 复制到项目 .agents/skills
 scripts/install.sh
+scripts/install.sh --copy <项目>/.agents/skills
 ```
 
 ## 仓库约定
