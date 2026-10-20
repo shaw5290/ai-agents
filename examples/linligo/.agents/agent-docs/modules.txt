@@ -1,0 +1,16 @@
+# 按顺序拼装：<分类>/<名> 读 ai-agents 仓库的 skills/<分类>/<名>/SKILL.md，以 .md 结尾的读本目录下的文件
+# claude/ 下的条目和 claude- 开头的文件只写入 CLAUDE.md
+project.md
+common/coding-behavior
+common/dev-workflow
+common/security
+common/git-conventions
+backend/spring-boot
+backend/spring-cloud
+backend/mysql
+orm/mybatis-plus
+frontend/vue3
+frontend/uniapp
+common/doc-maintenance
+claude/claude-code
+claude-skills.md

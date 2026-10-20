@@ -1,0 +1,15 @@
+{
+  "name": "ai-agents",
+  "version": "0.1.0",
+  "description": "团队 AI 编码规范与 skills：通用约束、后端、ORM、前端规范，以及 AGENTS.md / CLAUDE.md 生成器",
+  "author": { "name": "shaw" },
+  "repository": "https://github.com/shaw5290/ai-agents",
+  "skills": [
+    "./skills/common",
+    "./skills/backend",
+    "./skills/orm",
+    "./skills/frontend",
+    "./skills/claude",
+    "./skills/tools"
+  ]
+}

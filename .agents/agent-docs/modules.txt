@@ -1,0 +1,8 @@
+# 按顺序拼装：<分类>/<名> 读 skills/<分类>/<名>/SKILL.md，以 .md 结尾的读本目录下的文件
+# claude/ 下的条目和 claude- 开头的文件只写入 CLAUDE.md
+project.md
+common/coding-behavior
+common/dev-workflow
+common/git-conventions
+common/doc-maintenance
+claude/claude-code

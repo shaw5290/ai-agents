@@ -1,0 +1,16 @@
+{
+  "name": "ai-agents",
+  "owner": {
+    "name": "shaw"
+  },
+  "metadata": {
+    "description": "团队 AI 编码规范与 skills"
+  },
+  "plugins": [
+    {
+      "name": "ai-agents",
+      "source": "./",
+      "description": "团队 AI 编码规范与 skills"
+    }
+  ]
+}

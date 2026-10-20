@@ -1,57 +1,91 @@
-# AI 编码助手文档说明
+# AI 编码规范与 Skills 使用说明
 
-本项目的 `AGENTS.md`、`CLAUDE.md` 由 `docs/agent-templates/` 中的模块拼装生成。通用约束和各架构规范拆成独立模块，不同项目按需挑选组合。本文供团队成员阅读，AI 不需要读。
+本仓库（ai-agents）统一管理团队的 AI 编码规范。规范按分类做成符合 [Agent Skills](https://agentskills.io/specification) 标准的 skill，有两种用法：
 
-## 文件一览
+- **按需加载**：安装后，Claude Code、Codex、Cursor 等支持 Agent Skills 的工具会在相关任务中自动加载对应 skill。
+- **拼进项目文档**：用 `agent-docs` skill 把选中的规范拼装成业务项目的 `AGENTS.md`、`CLAUDE.md`，每次会话都生效。
 
-| 文件 | 读者 | 是否入库 |
+本文供团队成员阅读，AI 不需要读。
+
+## 目录结构
+
+```
+ai-agents/
+├── .claude-plugin/
+│   ├── plugin.json              # Claude Code plugin 清单，skills 字段列出各分类目录
+│   └── marketplace.json         # 本仓库同时作为 marketplace，source 指向 ./
+├── skills/
+│   ├── README.md                # skill 索引与新增规则
+│   ├── common/                  # 通用约束：coding-behavior、dev-workflow、security、git-conventions、doc-maintenance
+│   ├── backend/                 # spring-boot、spring-cloud、mysql
+│   ├── orm/                     # mybatis-plus、mybatis-plus-join、mybatis-flex
+│   ├── frontend/                # vue3、uniapp
+│   ├── claude/                  # claude-code（只写入 CLAUDE.md）
+│   └── tools/agent-docs/        # 生成器：SKILL.md + scripts/build.sh
+├── examples/linligo/.agents/agent-docs/   # 业务项目接入示例
+├── .agents/agent-docs/          # 本仓库自身的配置，生成根目录 AGENTS.md / CLAUDE.md
+├── scripts/install.sh           # 把 skills 展平软链到 ~/.agents/skills
+└── docs/
+    ├── ai-guide.md              # 本文
+    └── prompts/                 # 提示词
+```
+
+Agent Skills 标准只识别 `skills/<名>/SKILL.md` 这一层，分类只存在于本仓库中，安装时展平，因此 skill 名在所有分类之间必须唯一。
+
+## 安装
+
+| 方式 | 命令 | 适用 |
 |---|---|---|
-| `AGENTS.md` | 所有 AI 工具（Codex、Cursor 等） | 是，生成文件 |
-| `CLAUDE.md` | Claude Code | 是，生成文件 |
-| `CLAUDE.local.md` | Claude Code（个人本机配置） | 否 |
-| `docs/agent-templates/` | 模板库，维护规范的地方 | 是 |
+| Claude Code plugin | `/plugin marketplace add shaw5290/ai-agents`，再 `/plugin install ai-agents@ai-agents` | Claude Code 用户 |
+| 软链到通用目录 | 克隆本仓库后运行 `scripts/install.sh`（默认装到 `~/.agents/skills`，也可传目标目录） | Codex 等读取 `~/.agents/skills` 的工具 |
 
-`CLAUDE.md` = `AGENTS.md` 的全部内容 + Claude Code 专属模块。两份文件都独立完整，互不引用。
+- plugin 中的 skill 带命名空间，例如 `/ai-agents:agent-docs`。
+- 更新：plugin 用 `/plugin marketplace update ai-agents` 后再 `/plugin update ai-agents`，然后重启；软链方式 `git pull` 即可。
+- WSL 中的软链对 Windows 侧的工具不可见，Windows 侧的工具需要在 Windows 中另行安装。
 
-## 模板库结构
+要让团队成员打开业务项目时收到安装提示，在该项目的 `.claude/settings.json` 中加入：
 
-```
-docs/agent-templates/
-├── build.sh                     # 拼装脚本
-├── common/                      # 通用约束，所有项目都用
-│   ├── behavior.md              # 编码行为准则
-│   ├── workflow.md              # 工作要求
-│   ├── security.md              # 安全规范
-│   ├── git.md                   # Git 规范
-│   └── doc-maintenance.md       # 文档维护（告诉 AI 改模板而不是改生成文件）
-├── backend/
-│   ├── spring-boot.md           # 单体与微服务共用：分层、接口、事务、日志
-│   ├── spring-cloud.md          # 微服务追加：网关、Feign、服务边界
-│   └── mysql.md
-├── orm/                         # 三选一（mybatis-plus-join 需配合 mybatis-plus）
-│   ├── mybatis-plus.md
-│   ├── mybatis-plus-join.md
-│   └── mybatis-flex.md
-├── frontend/
-│   ├── vue3.md
-│   └── uniapp.md
-├── claude/
-│   └── claude-code.md           # Claude Code 工作方式、扩展结构、常用指令
-└── projects/
-    └── linligo/
-        ├── modules.txt          # 模块清单（决定拼装内容与顺序）
-        ├── project.md           # 项目概述、技术栈、目录、命令
-        └── claude-skills.md     # 项目的 Skills 映射
+```json
+{
+  "extraKnownMarketplaces": {
+    "ai-agents": {
+      "source": { "source": "github", "repo": "shaw5290/ai-agents" }
+    }
+  },
+  "enabledPlugins": {
+    "ai-agents@ai-agents": true
+  }
+}
 ```
 
-## 拼装规则
+## 业务项目接入
 
-- `modules.txt` 每行一个模块路径（不带 `.md`），按顺序拼接；`#` 开头为注释。
-- `claude/` 下的模块和文件名以 `claude-` 开头的模块只写入 `CLAUDE.md`，其余同时写入两份文件。
-- 模块文件以 `##` 作为顶级标题，生成文件的 `#` 标题由脚本添加。
-- 项目模块里的 Claude 专属文件不要命名为 `claude.md`：Windows 盘大小写不敏感，Claude Code 会把它当成 `CLAUDE.md` 自动加载。
+在业务项目中调用 `agent-docs` skill，它会询问项目信息、推荐模块，在项目里生成：
 
-## 常见组合
+```
+<项目>/
+├── .agents/agent-docs/
+│   ├── project.md               # 项目概述、技术栈、目录、命令、项目专属约定
+│   ├── modules.txt              # 拼装清单
+│   └── claude-skills.md         # 可选，项目的 Skills 映射（只写入 CLAUDE.md）
+├── AGENTS.md                    # 生成文件
+└── CLAUDE.md                    # 生成文件
+```
+
+也可以手动运行：`<ai-agents>/skills/tools/agent-docs/scripts/build.sh <项目目录> [输出目录]`。
+
+### modules.txt 规则
+
+- 每行一个条目，按顺序拼接；`#` 开头为注释。
+- `<分类>/<名>` 引用 skill，取 `SKILL.md` 去掉 frontmatter 后的正文。
+- 以 `.md` 结尾的条目读 `modules.txt` 所在目录下的文件。
+- `claude/` 下的条目和 `claude-` 开头的文件只写入 `CLAUDE.md`，其余同时写入两份文件。
+- 兼容 Windows 换行（CRLF）。
+- 项目配置里不要建名为 `claude.md` 的文件：Windows 盘大小写不敏感，Claude Code 会把它当成 `CLAUDE.md` 加载。
+
+完整示例见 `examples/linligo/.agents/agent-docs/`。
+
+### 常见组合
 
 | 项目类型 | 模块 |
 |---|---|
@@ -62,38 +96,34 @@ docs/agent-templates/
 | 管理后台前端 | + frontend/vue3 |
 | 小程序 | + frontend/uniapp |
 
-`common/*` 指 behavior、workflow、security、git、doc-maintenance 五个模块。
-
-## 新项目接入
-
-1. 新建 `projects/<项目名>/`，参照 `projects/linligo/` 编写 `project.md`、`modules.txt`，按需写 `claude-skills.md`。
-2. 生成到当前仓库根目录：`docs/agent-templates/build.sh <项目名>`。
-   生成到其他项目：`docs/agent-templates/build.sh <项目名> /path/to/project`。
-3. 生成到其他项目时，目标项目里没有模板库，需要改写 `common/doc-maintenance.md` 中的路径，或者在该项目的清单中不使用这个模块。
+`common/*` 指 coding-behavior、dev-workflow、security、git-conventions、doc-maintenance 五个 skill。
 
 ## 维护
 
 | 发生了什么 | 改哪里 |
 |---|---|
-| 某类规范需要调整（对所有项目生效） | 对应的 `common/`、`backend/`、`orm/`、`frontend/` 模块 |
-| 只对某个项目生效的约定 | `projects/<项目名>/project.md` |
-| 技术选型确定、目录或命令变化 | `projects/<项目名>/project.md` |
-| 引入或更换框架 | `projects/<项目名>/modules.txt` 增删模块；没有现成模块就新建 |
-| 新建 skill / 命令 / 子代理 | `projects/<项目名>/claude-skills.md` |
+| 某类规范需要调整（对所有项目生效） | 本仓库 `skills/<分类>/<名>/SKILL.md` |
+| 只对某个项目生效的约定 | 该项目的 `.agents/agent-docs/project.md` |
+| 技术选型确定、目录或命令变化 | 该项目的 `.agents/agent-docs/project.md` |
+| 引入或更换框架 | 该项目的 `modules.txt` 增删条目；没有现成 skill 就在本仓库新建 |
+| 新增 skill | 本仓库对应分类下新建，并登记到 `skills/README.md` |
+| 新增分类 | 新建目录，并加入 `.claude-plugin/plugin.json` 的 `skills` 列表 |
 | 只和自己电脑有关的配置 | `CLAUDE.local.md` |
 
-改完运行 `build.sh` 重新生成，并把模板和生成文件一起提交。
+- 改了 skill 后，提升 `plugin.json` 的 `version` 再发布，各业务项目更新 plugin 后重新生成文档。
+- 发布前运行 `claude plugin validate .`。根目录的 `CLAUDE.md` 是本仓库自身的开发文档，validate 对它给出的"不会作为 plugin 上下文加载"警告属于预期。
 
 ## 编写原则
 
-- 模块里只写给 AI 的规则、事实和命令，不写来源、背景、解释，这些写进本文。
+- skill 正文里只写给 AI 的规则、事实和命令，不写来源、背景、解释，这些写进本文。
 - 每条规则都应能检验，避免"写出高质量代码"这类空话。
-- 一条规则只放在一个模块里，不跨模块重复。
-- 模块之间互不引用，每个模块单独拿出来都能读懂。
+- 一条规则只放在一个 skill 里，不跨 skill 重复。
+- skill 之间互不引用，每个 skill 单独拿出来都能读懂。
+- `description` 写清做什么、何时使用，工具靠它决定是否加载。
 
 ## 内容来源
 
-| 模块 | 来源 |
+| Skill | 来源 |
 |---|---|
-| `common/behavior.md` | [andrej-karpathy-skills](https://github.com/forrestchang/andrej-karpathy-skills)：四条准则译为中文，删去解释性语句 |
-| `claude/claude-code.md` | [Everything Claude Code](https://github.com/affaan-m/everything-claude-code)：借用扩展结构、指令表、Skills 映射的组织方式，内容按本项目改写 |
+| `common/coding-behavior` | [andrej-karpathy-skills](https://github.com/forrestchang/andrej-karpathy-skills)：四条准则译为中文，删去解释性语句 |
+| `claude/claude-code` | [Everything Claude Code](https://github.com/affaan-m/everything-claude-code)：借用扩展结构、指令表、Skills 映射的组织方式，内容按本项目改写 |
