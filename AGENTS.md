@@ -125,13 +125,14 @@ docs/agent-templates/build.sh linligo
 - 禁止将密码、密钥、Token 写入代码或提交到仓库；使用环境变量或配置中心。
 - 所有外部输入在服务端校验，不信任前端校验结果。
 - 权限校验在服务端完成；接口按最小权限设计。
-- SQL 只用参数绑定，禁止拼接用户输入。
-- 日志中不输出密码、Token、身份证号、手机号等敏感信息，必要时脱敏。
+- **ALWAYS**：SQL 总是使用参数化查询，禁止拼接用户输入，防止 SQL 注入。
+- **NEVER**：日志中永远不打印密码、Token、身份证号、手机号等敏感信息，必要时脱敏。
 
 ## Git 规范
 
 - 分支：`main`、`dev`、`feature/xxx`、`fix/xxx`。
 - 提交信息遵循 Conventional Commits：`<type>(<scope>): <描述>`，type 取 `feat`、`fix`、`refactor`、`docs`、`test`、`chore`。
+- **MUST**：提交前必须通过所有测试。
 - 一次提交只做一件事；不提交构建产物、IDE 配置、`.env`。
 - 未经用户要求不执行 commit、push、强制推送、改写历史。
 
@@ -146,7 +147,7 @@ docs/agent-templates/build.sh linligo
 ### 接口
 
 - RESTful，路径小写中划线：`/api/v1/user-addresses/{id}`。
-- 统一返回 `R<T>`：`{ "code": 0, "msg": "ok", "data": ... }`；分页返回 `PageResult<T>`。
+- **IMPORTANT**：API 响应必须包含错误码，统一返回 `R<T>`：`{ "code": 0, "msg": "ok", "data": ... }`；分页返回 `PageResult<T>`。
 - 业务异常抛 `BizException(错误码)`，由全局异常处理器（`@RestControllerAdvice`）转换；Controller 中不 try-catch 吞异常。
 - 入参用 `jakarta.validation` 注解校验，Controller 参数加 `@Valid` / `@Validated`。
 
@@ -186,6 +187,7 @@ docs/agent-templates/build.sh linligo
 - 不建物理外键，关联关系由应用层维护。
 - 禁止 `SELECT *`；禁止在循环中查询数据库，改为批量查询。
 - 表结构变更必须提交 SQL 脚本，文件名带日期与序号，如 `20261019_01_create_user_account.sql`。
+- **CRITICAL**：所有数据库迁移脚本必须经过 review 才能执行。
 - 金额用 `decimal`，不用 `float` / `double`。
 
 ## MyBatis-Plus 规范

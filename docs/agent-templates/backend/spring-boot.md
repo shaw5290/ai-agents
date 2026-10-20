@@ -9,7 +9,7 @@
 ### 接口
 
 - RESTful，路径小写中划线：`/api/v1/user-addresses/{id}`。
-- 统一返回 `R<T>`：`{ "code": 0, "msg": "ok", "data": ... }`；分页返回 `PageResult<T>`。
+- **IMPORTANT**：API 响应必须包含错误码，统一返回 `R<T>`：`{ "code": 0, "msg": "ok", "data": ... }`；分页返回 `PageResult<T>`。
 - 业务异常抛 `BizException(错误码)`，由全局异常处理器（`@RestControllerAdvice`）转换；Controller 中不 try-catch 吞异常。
 - 入参用 `jakarta.validation` 注解校验，Controller 参数加 `@Valid` / `@Validated`。
 

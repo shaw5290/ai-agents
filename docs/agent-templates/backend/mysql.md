@@ -6,4 +6,5 @@
 - 不建物理外键，关联关系由应用层维护。
 - 禁止 `SELECT *`；禁止在循环中查询数据库，改为批量查询。
 - 表结构变更必须提交 SQL 脚本，文件名带日期与序号，如 `20261019_01_create_user_account.sql`。
+- **CRITICAL**：所有数据库迁移脚本必须经过 review 才能执行。
 - 金额用 `decimal`，不用 `float` / `double`。
