@@ -17,17 +17,25 @@ ai-agents/
 ├── skills/
 │   ├── README.md                # skill 索引与新增规则
 │   ├── common/                  # 通用约束：coding-behavior、dev-workflow、security、git-conventions、doc-maintenance
-│   ├── backend/                 # spring-boot、spring-cloud、mysql
+│   ├── backend/                 # spring-boot、spring-cloud、mysql，第三方 autotable-usage
 │   ├── orm/                     # mybatis-plus、mybatis-plus-join、mybatis-flex
-│   ├── frontend/                # vue3、uniapp
+│   ├── frontend/                # vue3、uniapp，第三方 vue-skills、uni-app、uview-pro、frontend-design、taste-skill
+│   ├── web/                     # 第三方：agent-browser、drissionpage、web-access
+│   ├── gitnexus/                # 第三方：GitNexus 代码分析系列
+│   ├── ponytail/                # 第三方：极简方案与过度设计审查系列
+│   ├── workflow/                # 第三方：create-plan、planning-with-files、context-manager、gh-fix-ci
+│   ├── writing/                 # 第三方：humanizer-zh
 │   ├── claude/                  # claude-code（只写入 CLAUDE.md）
-│   └── tools/agent-docs/        # 生成器：SKILL.md + scripts/build.sh
-├── examples/linligo/.agents/agent-docs/   # 业务项目接入示例
+│   └── tools/                   # agent-docs 生成器，第三方 skill-creator、file-organizer
+├── examples/                    # 业务项目接入示例
+│   ├── linligo/.agents/agent-docs/
+│   └── epost-integration-service/.agents/agent-docs/
 ├── .agents/agent-docs/          # 本仓库自身的配置，生成根目录 AGENTS.md / CLAUDE.md
 ├── scripts/install.sh           # 把 skills 展平软链到 ~/.agents/skills
 └── docs/
     ├── ai-guide.md              # 本文
-    └── prompts/                 # 提示词
+    ├── prompts/                 # 提示词
+    └── references/              # 参考资料（如多数据源整合方案）
 ```
 
 Agent Skills 标准只识别 `skills/<名>/SKILL.md` 这一层，分类只存在于本仓库中，安装时展平，因此 skill 名在所有分类之间必须唯一。
@@ -83,7 +91,7 @@ Agent Skills 标准只识别 `skills/<名>/SKILL.md` 这一层，分类只存在
 - 兼容 Windows 换行（CRLF）。
 - 项目配置里不要建名为 `claude.md` 的文件：Windows 盘大小写不敏感，Claude Code 会把它当成 `CLAUDE.md` 加载。
 
-完整示例见 `examples/linligo/.agents/agent-docs/`。
+完整示例见 `examples/` 下各项目的 `.agents/agent-docs/`。`epost-integration-service` 演示了项目约定与通用 skill 冲突时的做法：冲突的 skill 不写进 `modules.txt`，改由 `project.md` 写明本项目约定。
 
 ### 常见组合
 
@@ -127,3 +135,23 @@ Agent Skills 标准只识别 `skills/<名>/SKILL.md` 这一层，分类只存在
 |---|---|
 | `common/coding-behavior` | [andrej-karpathy-skills](https://github.com/forrestchang/andrej-karpathy-skills)：四条准则译为中文，删去解释性语句 |
 | `claude/claude-code` | [Everything Claude Code](https://github.com/affaan-m/everything-claude-code)：借用扩展结构、指令表、Skills 映射的组织方式，内容按本项目改写 |
+| `backend/spring-boot` 代码风格、日志级别、测试命名，`common/security` 密码存储与响应脱敏，`common/dev-workflow` 同步文档 | 原 ai-kit `rules/` 中与现有规范不冲突的通用规则 |
+| `examples/epost-integration-service` | 原 ai-kit `rules/` 三份规则文档，改写为 project.md |
+
+### 第三方 skill
+
+原 ai-kit 收录，第三方 skill 需保持与上游一致。许可证未知的 skill 不要公开再分发。
+
+| Skill | 上游 | 许可证 |
+|---|---|---|
+| `web/web-access` | [eze-is/web-access](https://github.com/eze-is/web-access) | MIT |
+| `ponytail/*` | [DietrichGebert/ponytail](https://github.com/DietrichGebert/ponytail) | MIT（`ponytail` 声明） |
+| `gitnexus/*` | [abhigyanpatwari/GitNexus](https://github.com/abhigyanpatwari/GitNexus) | 未知 |
+| `frontend/taste-skill` | [Leonxlnx/taste-skill](https://github.com/Leonxlnx/taste-skill)（commit 840b46b） | 上游无 LICENSE |
+| `frontend/frontend-design` | sickn33 antigravity-awesome-skills（社区） | 见 LICENSE.txt |
+| `workflow/gh-fix-ci` | 未注明 | 见 LICENSE.txt |
+| `writing/humanizer-zh` | 译自 blader/humanizer，参考 hardikpandya/stop-slop | 未知 |
+| `workflow/context-manager` | 社区 | 未知 |
+| 其余 | 未注明 | 未知 |
+
+本地改动：`workflow/planning-with-files` 的 Stop hook 脚本路径改为 `${CLAUDE_PLUGIN_ROOT}/skills/workflow/planning-with-files/scripts`，以适配本仓库的 plugin 结构。

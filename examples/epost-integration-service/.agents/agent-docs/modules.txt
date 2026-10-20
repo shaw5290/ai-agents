@@ -1,0 +1,6 @@
+# 按顺序拼装：<分类>/<名> 读 ai-agents 仓库的 skills/<分类>/<名>/SKILL.md，以 .md 结尾的读本目录下的文件
+# 本项目的分层、数据库、接口、Git 约定与通用 skill 不同，写在 project.md 中，不引用 spring-boot、mysql、mybatis-plus、git-conventions、dev-workflow
+project.md
+common/coding-behavior
+common/security
+common/doc-maintenance
